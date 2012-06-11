@@ -1,12 +1,7 @@
 {
-  "author": {
-    "name": "Isaac Z. Schlueter",
-    "email": "i@izs.me",
-    "url": "http://blog.izs.me/"
-  },
   "name": "read-installed",
   "description": "Read all the installed packages in a folder, and return a tree structure with all the data.",
-  "version": "0.0.0",
+  "version": "0.0.1",
   "repository": {
     "type": "git",
     "url": "git://github.com/isaacs/read-installed"
@@ -23,5 +18,6 @@
   "optionalDependencies": {
     "graceful-fs": "~1.1.8",
     "npmlog": "0"
-  }
+  },
+  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)"
 }
