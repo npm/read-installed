@@ -11,7 +11,7 @@
     "test": "node test/basic.js"
   },
   "dependencies": {
-    "semver": "~1.0.14",
+    "semver": "1.x",
     "slide": "~1.1.3",
     "read-package-json": "0"
   },
