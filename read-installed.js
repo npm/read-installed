@@ -293,6 +293,14 @@ function findUnmet (obj) {
       }
 
     })
+
+  var peerDeps = obj.peerDependencies = obj.peerDependencies || {}
+  Object.keys(peerDeps).forEach(function (d) {
+    var dependency = obj.parent && obj.parent.dependencies &&
+      obj.parent.dependencies[d]
+    dependency.extraneous = false
+  })
+
   log.verbose("readInstalled", "returning", obj._id)
   return obj
 }
