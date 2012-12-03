@@ -50,6 +50,7 @@ the higher level (sibling to foo), you'd get this object structure:
 Unmet deps are left as strings.
 Extraneous deps are marked with extraneous:true
 deps that don't meet a requirement are marked with invalid:true
+deps that don't meet a peer requirement are marked with peerInvalid:true
 
 to READ(packagefolder, parentobj, name, reqver)
 obj = read package.json
@@ -299,6 +300,10 @@ function findUnmet (obj) {
     var dependency = obj.parent && obj.parent.dependencies &&
       obj.parent.dependencies[d]
     dependency.extraneous = false
+
+    if (!semver.satisfies(dependency.version, peerDeps[d])) {
+      dependency.peerInvalid = true
+    }
   })
 
   log.verbose("readInstalled", "returning", obj._id)
