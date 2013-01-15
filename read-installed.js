@@ -118,11 +118,11 @@ function readInstalled (/* folder, depth, silent, cb */) {
   var args   = [].slice.call(arguments),
       cb     = args.pop(),
       folder = args.shift(),
-      depth  = args.shift(),
+      depth  = args.shift() || Infinity,
       silent = args.pop();
 
   if (typeof depth === "boolean") silent = depth, depth = Infinity
-  
+
   // silent logs
   if(silent) disableLogging()
     
