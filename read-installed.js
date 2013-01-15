@@ -93,11 +93,17 @@ try {
   var fs = require("fs")
 }
 
-try {
-  var log = require("npmlog")
-} catch (_) {
-  var log = { verbose: noop, info: noop, warn: noop, error: noop }
+var log;
+
+function disableLogging () {
+  log = { verbose: noop, info: noop, warn: noop, error: noop }
   function noop () {}
+}
+
+try {
+  log = require("npmlog")
+} catch (_) {
+  disableLogging()
 }
 
 var path = require("path")
@@ -108,8 +114,18 @@ var url = require("url")
 
 module.exports = readInstalled
 
-function readInstalled (folder, depth, cb) {
-  if (typeof cb !== "function") cb = depth, depth = Infinity
+function readInstalled (/* folder, depth, silent, cb */) {
+  var args   = [].slice.call(arguments),
+      cb     = args.pop(),
+      folder = args.shift(),
+      depth  = args.shift(),
+      silent = args.pop();
+
+  if (typeof depth === "boolean") silent = depth, depth = Infinity
+  
+  // silent logs
+  if(silent) disableLogging()
+    
   readInstalled_(folder, null, null, null, 0, depth, function (er, obj) {
     if (er) return cb(er)
     // now obj has all the installed things, where they're installed
