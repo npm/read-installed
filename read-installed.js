@@ -297,8 +297,13 @@ function findUnmet (obj) {
 
   var peerDeps = obj.peerDependencies = obj.peerDependencies || {}
   Object.keys(peerDeps).forEach(function (d) {
-    var dependency = obj.parent && obj.parent.dependencies &&
-      obj.parent.dependencies[d]
+    var dependency = obj.parent &&
+                     obj.parent.dependencies &&
+                     obj.parent.dependencies[d]
+
+    if (!dependency)
+      return
+
     dependency.extraneous = false
 
     if (!semver.satisfies(dependency.version, peerDeps[d])) {
