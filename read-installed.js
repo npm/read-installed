@@ -93,13 +93,6 @@ try {
   var fs = require("fs")
 }
 
-try {
-  var log = require("npmlog")
-} catch (_) {
-  var log = { verbose: noop, info: noop, warn: noop, error: noop }
-  function noop () {}
-}
-
 var path = require("path")
 var asyncMap = require("slide").asyncMap
 var semver = require("semver")
@@ -108,13 +101,18 @@ var url = require("url")
 
 module.exports = readInstalled
 
-function readInstalled (folder, depth, cb) {
+function readInstalled (folder, depth, log, cb) {
+  if (typeof cb !== "function") {
+    cb = log
+    log = function () {}
+  }
   if (typeof cb !== "function") cb = depth, depth = Infinity
+
   readInstalled_(folder, null, null, null, 0, depth, function (er, obj) {
     if (er) return cb(er)
     // now obj has all the installed things, where they're installed
     // figure out the inheritance links, now that the object is built.
-    resolveInheritance(obj)
+    resolveInheritance(obj, log)
     cb(null, obj)
   })
 }
@@ -236,7 +234,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
 
 // starting from a root object, call findUnmet on each layer of children
 var riSeen = []
-function resolveInheritance (obj) {
+function resolveInheritance (obj, log) {
   if (typeof obj !== "object") return
   if (riSeen.indexOf(obj) !== -1) return
   riSeen.push(obj)
@@ -244,18 +242,18 @@ function resolveInheritance (obj) {
     obj.dependencies = {}
   }
   Object.keys(obj.dependencies).forEach(function (dep) {
-    findUnmet(obj.dependencies[dep])
+    findUnmet(obj.dependencies[dep], log)
   })
   Object.keys(obj.dependencies).forEach(function (dep) {
-    resolveInheritance(obj.dependencies[dep])
+    resolveInheritance(obj.dependencies[dep], log)
   })
-  findUnmet(obj)
+  findUnmet(obj, log)
 }
 
 // find unmet deps by walking up the tree object.
 // No I/O
 var fuSeen = []
-function findUnmet (obj) {
+function findUnmet (obj, log) {
   if (fuSeen.indexOf(obj) !== -1) return
   fuSeen.push(obj)
   //console.error("find unmet", obj.name, obj.parent && obj.parent.name)
@@ -282,10 +280,10 @@ function findUnmet (obj) {
             && !url.parse(deps[d]).protocol
             && !semver.satisfies(found.version, deps[d])) {
           // the bad thing will happen
-          log.warn("unmet dependency", obj.path + " requires "+d+"@'"+deps[d]
-                  +"' but will load\n"
-                  +found.path+",\nwhich is version "+found.version
-                  )
+          log("unmet dependency", obj.path + " requires "+d+"@'"+deps[d]
+             +"' but will load\n"
+             +found.path+",\nwhich is version "+found.version
+             )
           found.invalid = true
         } else {
           found.extraneous = false
@@ -319,7 +317,6 @@ function findUnmet (obj) {
     }
   })
 
-  log.verbose("readInstalled", "returning", obj._id)
   return obj
 }
 

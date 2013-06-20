@@ -16,8 +16,7 @@
     "read-package-json": "0"
   },
   "optionalDependencies": {
-    "graceful-fs": "~1.2.0",
-    "npmlog": "0"
+    "graceful-fs": "~1.2.0"
   },
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)"
 }
