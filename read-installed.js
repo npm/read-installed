@@ -101,12 +101,15 @@ var url = require("url")
 
 module.exports = readInstalled
 
-function readInstalled (folder, depth, log, cb) {
-  if (typeof cb !== "function") {
-    cb = log
-    log = function () {}
+function readInstalled (folder, depth_, log_, cb_) {
+  var depth = Infinity, log = function () {}, cb
+  for (var i = 1; i < arguments.length - 1; i++) {
+    if (typeof arguments[i] === 'number')
+      depth = arguments[i]
+    else if (typeof arguments[i] === 'function')
+      log = arguments[i]
   }
-  if (typeof cb !== "function") cb = depth, depth = Infinity
+  cb = arguments[i]
 
   readInstalled_(folder, null, null, null, 0, depth, function (er, obj) {
     if (er) return cb(er)
