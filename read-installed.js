@@ -179,8 +179,8 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
 
     // "foo":"http://blah" is always presumed valid
     if (reqver
-        && semver.validRange(reqver)
-        && !semver.satisfies(obj.version, reqver)) {
+        && semver.validRange(reqver, true)
+        && !semver.satisfies(obj.version, reqver, true)) {
       obj.invalid = true
     }
 
@@ -281,7 +281,7 @@ function findUnmet (obj, log) {
         if ( typeof deps[d] === "string"
             // url deps presumed innocent.
             && !url.parse(deps[d]).protocol
-            && !semver.satisfies(found.version, deps[d])) {
+            && !semver.satisfies(found.version, deps[d], true)) {
           // the bad thing will happen
           log("unmet dependency", obj.path + " requires "+d+"@'"+deps[d]
              +"' but will load\n"
@@ -315,7 +315,7 @@ function findUnmet (obj, log) {
 
     dependency.extraneous = false
 
-    if (!semver.satisfies(dependency.version, peerDeps[d])) {
+    if (!semver.satisfies(dependency.version, peerDeps[d], true)) {
       dependency.peerInvalid = true
     }
   })
