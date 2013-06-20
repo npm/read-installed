@@ -13,7 +13,7 @@
   "dependencies": {
     "semver": "1.x",
     "slide": "~1.1.3",
-    "read-package-json": "0"
+    "read-package-json": "1"
   },
   "optionalDependencies": {
     "graceful-fs": "~1.2.0"
