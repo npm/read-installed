@@ -18,5 +18,11 @@
   "optionalDependencies": {
     "graceful-fs": "~2"
   },
-  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)"
+  "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
+  "licenses": [
+    {
+      "type": "BSD",
+      "url": "https://raw.github.com/isaacs/read-installed/master/LICENSE"
+    }
+  ]
 }
