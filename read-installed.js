@@ -174,7 +174,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, dev, cb)
     obj.realName = name || obj.name
     obj.dependencies = obj.dependencies || {}
 
-    // "foo":"http://blah" is always presumed valid
+    // "foo":"http://blah" and "foo":"latest" are always presumed valid
     if (reqver
         && semver.validRange(reqver, true)
         && !semver.satisfies(obj.version, reqver, true)) {
@@ -283,9 +283,9 @@ function findUnmet (obj, log) {
           r = r.link ? null : r.parent
           continue
         }
+        // "foo":"http://blah" and "foo":"latest" are always presumed valid
         if ( typeof deps[d] === "string"
-            // url deps presumed innocent.
-            && !url.parse(deps[d]).protocol
+            && semver.validRange(deps[d], true)
             && !semver.satisfies(found.version, deps[d], true)) {
           // the bad thing will happen
           log("unmet dependency", obj.path + " requires "+d+"@'"+deps[d]
