@@ -101,17 +101,19 @@ var url = require("url")
 
 module.exports = readInstalled
 
-function readInstalled (folder, depth_, log_, cb_) {
-  var depth = Infinity, log = function () {}, cb
+function readInstalled (folder, depth_, log_, dev_, cb_) {
+  var depth = Infinity, log = function () {}, cb, dev
   for (var i = 1; i < arguments.length - 1; i++) {
     if (typeof arguments[i] === 'number')
       depth = arguments[i]
     else if (typeof arguments[i] === 'function')
       log = arguments[i]
+    else if (typeof arguments[i] === 'boolean')
+      dev = arguments[i]
   }
   cb = arguments[i]
 
-  readInstalled_(folder, null, null, null, 0, depth, function (er, obj) {
+  readInstalled_(folder, null, null, null, 0, depth, dev, function (er, obj) {
     if (er) return cb(er)
     // now obj has all the installed things, where they're installed
     // figure out the inheritance links, now that the object is built.
@@ -121,7 +123,7 @@ function readInstalled (folder, depth_, log_, cb_) {
 }
 
 var rpSeen = {}
-function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
+function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, dev, cb) {
   var installed
     , obj
     , real
@@ -186,7 +188,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
 
     if (parent
         && !(name in parent.dependencies)
-        && !(name in (parent.devDependencies || {}))) {
+        && (dev || !(name in (parent.devDependencies || {})))) {
       obj.extraneous = true
     }
     obj.path = obj.path || folder
@@ -198,7 +200,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
     //if (depth >= maxDepth) return cb(null, obj)
     asyncMap(installed, function (pkg, cb) {
       var rv = obj.dependencies[pkg]
-      if (!rv && obj.devDependencies) rv = obj.devDependencies[pkg]
+      if (!rv && obj.devDependencies && !dev) rv = obj.devDependencies[pkg]
       if (depth >= maxDepth) {
         // just try to get the version number
         var pkgfolder = path.resolve(folder, "node_modules", pkg)
@@ -220,6 +222,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, cb) {
 
       readInstalled_( path.resolve(folder, "node_modules/"+pkg)
                     , obj, pkg, obj.dependencies[pkg], depth + 1, maxDepth
+                    , dev
                     , cb )
 
     }, function (er, installedData) {
