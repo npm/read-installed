@@ -7,7 +7,9 @@ var test = require("tap").test
 var path = require("path")
 
 test("make sure that it works", function (t) {
-  readInstalled(path.join(__dirname, "../"), console.error, function (er, map) {
+  readInstalled(path.join(__dirname, "../"), {
+    log: console.error
+  }, function (er, map) {
     t.notOk(er, "er should be bull")
     t.ok(map, "map should be data")
     if (er) return console.error(er.stack || er.message)
