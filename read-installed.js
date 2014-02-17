@@ -106,7 +106,9 @@ function readInstalled (folder, opts, cb) {
     cb = opts
     opts = {}
   }
-  var depth = Infinity || opts.depth, log = function () {} || opts.log, dev = false || opts.dev
+  var depth = (typeof opts.depth === 'number') ? opts.depth : Infinity
+    , log = (typeof opts.log === 'function') ? opts.log : function () {}
+    , dev = !!opts.dev;
 
   readInstalled_(folder, null, null, null, 0, depth, dev, function (er, obj) {
     if (er) return cb(er)
