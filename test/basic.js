@@ -1,5 +1,5 @@
 var readInstalled = require("../read-installed.js")
-var json = require("../package.json")
+var json = require("./fixtures/package.json")
 var known = [].concat(Object.keys(json.dependencies)
   , Object.keys(json.optionalDependencies)
   , Object.keys(json.devDependencies)).sort()
