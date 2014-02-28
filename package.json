@@ -8,7 +8,7 @@
   },
   "main": "read-installed.js",
   "scripts": {
-    "test": "tap ./test/"
+    "test": "tap ./test/*.js"
   },
   "dependencies": {
     "semver": "2",
