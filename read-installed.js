@@ -185,6 +185,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, maxDepth, dev, cb)
 
     if (parent
         && !(name in parent.dependencies)
+        && (parent.bundleDependencies || []).indexOf(name) === -1
         && (dev || !(name in (parent.devDependencies || {})))) {
       obj.extraneous = true
     }
