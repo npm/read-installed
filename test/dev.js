@@ -8,8 +8,9 @@ var known = [].concat(Object.keys(json.dependencies)
 
 test("make sure that it works without dev deps", function (t) {
   readInstalled(path.join(__dirname, "../"), {
-    log: console.error
-    , dev: true }, function (er, map) {
+    log: console.error,
+    dev: false
+  }, function (er, map) {
     t.notOk(er, "er should be bull")
     t.ok(map, "map should be data")
     if (er) return console.error(er.stack || er.message)
