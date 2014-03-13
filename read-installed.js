@@ -111,8 +111,10 @@ function readInstalled (folder, opts, cb) {
     opts = extend({}, opts)
   }
 
-  if (typeof opts.depth !== 'number' || opts.depth < 0)
+  if (typeof opts.depth !== 'number')
     opts.depth = Infinity
+
+  opts.depth = Math.max(0, opts.depth)
 
   if (typeof opts.log !== 'function')
     opts.log = function () {}
