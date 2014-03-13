@@ -8,6 +8,7 @@ var path = require("path")
 
 test("make sure that it works", function (t) {
   readInstalled(path.join(__dirname, "../"), {
+    dev: true,
     log: console.error
   }, function (er, map) {
     t.notOk(er, "er should be bull")
@@ -21,6 +22,7 @@ test("make sure that it works", function (t) {
     t.end()
   })
 })
+
 var seen = []
 function cleanup (map) {
   if (seen.indexOf(map) !== -1) return
