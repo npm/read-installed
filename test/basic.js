@@ -22,6 +22,7 @@ test("make sure that it works", function (t) {
     t.end()
   })
 })
+
 var seen = []
 function cleanup (map) {
   if (seen.indexOf(map) !== -1) return

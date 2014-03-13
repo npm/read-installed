@@ -99,6 +99,7 @@ var semver = require("semver")
 var readJson = require("read-package-json")
 var url = require("url")
 var util = require("util")
+var extend = require("util-extend")
 
 module.exports = readInstalled
 
@@ -107,7 +108,7 @@ function readInstalled (folder, opts, cb) {
     cb = opts
     opts = {}
   } else {
-    opts = util._extend({}, opts)
+    opts = extend({}, opts)
   }
 
   if (typeof opts.depth !== 'number' || opts.depth < 0)
