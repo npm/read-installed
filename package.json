@@ -17,7 +17,7 @@
     "util-extend": "^1.0.1"
   },
   "optionalDependencies": {
-    "graceful-fs": "~2"
+    "graceful-fs": "2 || 3"
   },
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "license": "ISC",
