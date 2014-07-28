@@ -129,6 +129,7 @@ function readInstalled (folder, opts, cb) {
     opts.log = function () {}
 
   opts.dev = !!opts.dev
+  opts.rpSeen = {}
 
   readInstalled_(folder, null, null, null, 0, opts, function (er, obj) {
     if (er) return cb(er)
@@ -140,12 +141,12 @@ function readInstalled (folder, opts, cb) {
   })
 }
 
-var rpSeen = {}
 function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
   var installed
     , obj
     , real
     , link
+    , rpSeen = opts.rpSeen
 
   fs.readdir(path.resolve(folder, "node_modules"), function (er, i) {
     // error indicates that nothing is installed here
