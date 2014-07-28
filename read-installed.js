@@ -270,7 +270,11 @@ function resolveInheritance (obj, opts) {
     findUnmet(obj.dependencies[dep], opts)
   })
   Object.keys(obj.dependencies).forEach(function (dep) {
-    resolveInheritance(obj.dependencies[dep], opts)
+    if (typeof obj.dependencies[dep] === "object") {
+      resolveInheritance(obj.dependencies[dep], opts)
+    } else {
+      debug("unmet dep! %s %s@%s", obj.name, dep, obj.dependencies[dep])
+    }
   })
   findUnmet(obj, opts)
 }
@@ -281,7 +285,7 @@ function findUnmet (obj, opts) {
   var fuSeen = opts.fuSeen
   if (fuSeen.indexOf(obj) !== -1) return
   fuSeen.push(obj)
-  debug("find unmet", obj.name, obj.parent && obj.parent.name)
+  debug("find unmet obj=%j parent=%s", obj.name || obj, obj.parent && obj.parent.name)
   var deps = obj.dependencies = obj.dependencies || {}
 
   debug(deps)
@@ -289,10 +293,11 @@ function findUnmet (obj, opts) {
     .filter(function (d) { return typeof deps[d] === "string" })
     .forEach(function (d) {
       var found = findDep(obj, d)
-      debug("finding dep %j", d, found.name || found)
+      debug("finding dep %j", d, found && found.name || found)
       // "foo":"http://blah" and "foo":"latest" are always presumed valid
       if (typeof deps[d] === "string" &&
           semver.validRange(deps[d], true) &&
+          found &&
           !semver.satisfies(found.version, deps[d], true)) {
         // the bad thing will happen
         opts.log( "unmet dependency"
@@ -301,7 +306,9 @@ function findUnmet (obj, opts) {
                 + found.path+",\nwhich is version "+found.version )
         found.invalid = true
       }
-      deps[d] = found
+      if (found) {
+        deps[d] = found
+      }
     })
 
   var peerDeps = obj.peerDependencies = obj.peerDependencies || {}
