@@ -130,6 +130,8 @@ function readInstalled (folder, opts, cb) {
 
   opts.dev = !!opts.dev
   opts.rpSeen = {}
+  opts.fuSeen = []
+
 
   readInstalled_(folder, null, null, null, 0, opts, function (er, obj) {
     if (er) return cb(er)
@@ -275,8 +277,8 @@ function resolveInheritance (obj, opts) {
 
 // find unmet deps by walking up the tree object.
 // No I/O
-var fuSeen = []
 function findUnmet (obj, opts) {
+  var fuSeen = opts.fuSeen
   if (fuSeen.indexOf(obj) !== -1) return
   fuSeen.push(obj)
   debug("find unmet", obj.name, obj.parent && obj.parent.name)
