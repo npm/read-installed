@@ -101,6 +101,15 @@ var url = require("url")
 var util = require("util")
 var extend = require("util-extend")
 
+var debug = function() {}
+if (/\bread-installed\b/i.test(process.env.NODE_DEBUG || "")) {
+  debug = function () {
+    var msg = util.format.apply(util, arguments)
+    msg = msg.trim().split(/\n/).join("\nREAD-INSTALLED ")
+    console.error("%s %s", "READ-INSTALLED", msg)
+  }
+}
+
 module.exports = readInstalled
 
 function readInstalled (folder, opts, cb) {
@@ -161,7 +170,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       return next(er)
     }
     fs.realpath(folder, function (er, rp) {
-      //console.error("realpath(%j) = %j", folder, rp)
+      debug("realpath(%j) = %j", folder, rp)
       real = rp
       if (st.isSymbolicLink()) link = rp
       next(er)
@@ -176,7 +185,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       errState = er
       return cb(null, [])
     }
-    //console.error('next', installed, obj && typeof obj, name, real)
+    debug('next', installed, obj && typeof obj, name, real)
     if (!installed || !obj || !real || called) return
     called = true
     if (rpSeen[real]) return cb(null, rpSeen[real])
@@ -270,10 +279,10 @@ var fuSeen = []
 function findUnmet (obj, opts) {
   if (fuSeen.indexOf(obj) !== -1) return
   fuSeen.push(obj)
-  //console.error("find unmet", obj.name, obj.parent && obj.parent.name)
+  debug("find unmet", obj.name, obj.parent && obj.parent.name)
   var deps = obj.dependencies = obj.dependencies || {}
 
-  //console.error(deps)
+  debug(deps)
   Object.keys(deps)
     .filter(function (d) { return typeof deps[d] === "string" })
     .forEach(function (d) {
