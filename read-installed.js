@@ -136,7 +136,7 @@ function readInstalled (folder, opts, cb) {
     // now obj has all the installed things, where they're installed
     // figure out the inheritance links, now that the object is built.
     resolveInheritance(obj, opts)
-    markExtraneous(obj)
+    unmarkExtraneous(obj, opts)
     cb(null, obj)
   })
 }
@@ -198,6 +198,9 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
     obj.realName = name || obj.name
     obj.dependencies = obj.dependencies || {}
 
+    // At this point, figure out what dependencies we NEED to get met
+    obj._dependencies = copy(obj.dependencies)
+
     // "foo":"http://blah" and "foo":"latest" are always presumed valid
     if (reqver
         && semver.validRange(reqver, true)
@@ -205,15 +208,11 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       obj.invalid = true
     }
 
-    if (parent) {
-      var deps = parent.dependencies || {}
-      var inDeps = name in deps
-      var devDeps = parent.devDependencies || {}
-      var inDev = opts.dev && (name in devDeps)
-      if (!inDeps && !inDev) {
-        obj.extraneous = true
-      }
-    }
+    // Mark as extraneous at this point.
+    // This will be un-marked in unmarkExtraneous, where we mark as
+    // not-extraneous everything that is required in some way from
+    // the root object.
+    obj.extraneous = true
 
     obj.path = obj.path || folder
     obj.realPath = real
@@ -287,32 +286,20 @@ function findUnmet (obj, opts) {
   Object.keys(deps)
     .filter(function (d) { return typeof deps[d] === "string" })
     .forEach(function (d) {
-      //console.error("find unmet", obj.name, d, deps[d])
-      var r = obj.parent
-        , found = null
-      while (r && !found && typeof deps[d] === "string") {
-        // if r is a valid choice, then use that.
-        found = r.dependencies[d]
-        if (!found && r.realName === d) found = r
-
-        if (!found) {
-          r = r.link ? null : r.parent
-          continue
-        }
-        // "foo":"http://blah" and "foo":"latest" are always presumed valid
-        if ( typeof deps[d] === "string"
-            && semver.validRange(deps[d], true)
-            && !semver.satisfies(found.version, deps[d], true)) {
-          // the bad thing will happen
-          opts.log("unmet dependency", obj.path + " requires "+d+"@'"+deps[d]
-             +"' but will load\n"
-             +found.path+",\nwhich is version "+found.version
-             )
-          found.invalid = true
-        }
-        deps[d] = found
+      var found = findDep(obj, d)
+      debug("finding dep %j", d, found.name || found)
+      // "foo":"http://blah" and "foo":"latest" are always presumed valid
+      if (typeof deps[d] === "string" &&
+          semver.validRange(deps[d], true) &&
+          !semver.satisfies(found.version, deps[d], true)) {
+        // the bad thing will happen
+        opts.log( "unmet dependency"
+                , obj.path + " requires "+d+"@'"+deps[d]
+                + "' but will load\n"
+                + found.path+",\nwhich is version "+found.version )
+        found.invalid = true
       }
-
+      deps[d] = found
     })
 
   var peerDeps = obj.peerDependencies = obj.peerDependencies || {}
@@ -339,34 +326,56 @@ function findUnmet (obj, opts) {
       obj.dependencies[d] = peerDeps[d]
     } else if (!semver.satisfies(dependency.version, peerDeps[d], true)) {
       dependency.peerInvalid = true
-    } else {
-      dependency.extraneous = obj.extraneous || false
     }
   })
 
   return obj
 }
 
-function recursivelyMarkExtraneous (obj, extraneous) {
-  // stop recursion if we're not changing anything
-  if (obj.extraneous === extraneous) return
+function unmarkExtraneous (obj, opts) {
+  // Mark all non-required deps as extraneous.
+  // start from the root object and mark as non-extraneous all modules
+  // that haven't been previously flagged as extraneous then propagate
+  // to all their dependencies
 
-  obj.extraneous = extraneous
-  var deps = obj.dependencies = obj.dependencies || {}
-  Object.keys(deps).forEach(function(d){
-    recursivelyMarkExtraneous(deps[d], extraneous)
+  obj.extraneous = false
+  var deps = obj._dependencies
+  if (opts.dev && obj.devDependencies) {
+    Object.keys(obj.devDependencies).forEach(function (k) {
+      deps[k] = obj.devDependencies[k]
+    })
+  }
+
+  if (obj.peerDependencies) {
+    Object.keys(obj.peerDependencies).forEach(function (k) {
+      deps[k] = obj.peerDependencies[k]
+    })
+  }
+
+  Object.keys(deps).forEach(function (d) {
+    var dep = findDep(obj, d)
+    if (dep && dep.extraneous) {
+      unmarkExtraneous(dep, opts);
+    }
   });
 }
 
-function markExtraneous (obj) {
-  // start from the root object and mark as non-extraneous all modules that haven't been previously flagged as
-  // extraneous then propagate to all their dependencies
-  var deps = obj.dependencies = obj.dependencies || {}
-  Object.keys(deps).forEach(function(d){
-    if (!deps[d].extraneous){
-      recursivelyMarkExtraneous(deps[d], false);
+// Find the one that will actually be loaded by require()
+// so we can make sure it's valid etc.
+function findDep (obj, d) {
+  var r = obj
+    , found = null
+  while (r && !found) {
+    // if r is a valid choice, then use that.
+    // kinda weird if a pkg depends on itself, but after the first
+    // iteration of this loop, it indicates a dep cycle.
+    if (typeof r.dependencies[d] === "object") {
+      found = r.dependencies[d]
     }
-  });
+    if (!found && r.realName === d) found = r
+    r = r.link ? null : r.parent
+  }
+  return found
 }
 
 function copy (obj) {
