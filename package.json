@@ -22,6 +22,8 @@
   "author": "Isaac Z. Schlueter <i@izs.me> (http://blog.izs.me/)",
   "license": "ISC",
   "devDependencies": {
+    "mkdirp": "^0.5.0",
+    "rimraf": "^2.2.8",
     "tap": "~0.4.8"
   }
 }
