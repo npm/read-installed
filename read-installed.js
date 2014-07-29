@@ -129,8 +129,8 @@ function readInstalled (folder, opts, cb) {
     opts.log = function () {}
 
   opts.dev = !!opts.dev
-  opts.rpSeen = {}
-  opts.fuSeen = []
+  opts.realpathSeen = {}
+  opts.findUnmetSeen = []
 
 
   readInstalled_(folder, null, null, null, 0, opts, function (er, obj) {
@@ -148,7 +148,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
     , obj
     , real
     , link
-    , rpSeen = opts.rpSeen
+    , realpathSeen = opts.realpathSeen
 
   fs.readdir(path.resolve(folder, "node_modules"), function (er, i) {
     // error indicates that nothing is installed here
@@ -191,7 +191,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
     debug('next', installed, obj && typeof obj, name, real)
     if (!installed || !obj || !real || called) return
     called = true
-    if (rpSeen[real]) return cb(null, rpSeen[real])
+    if (realpathSeen[real]) return cb(null, realpathSeen[real])
     if (obj === true) {
       obj = {dependencies:{}, path:folder}
       installed.forEach(function (i) { obj.dependencies[i] = "*" })
@@ -220,7 +220,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
     obj.realPath = real
     obj.link = link
     if (parent && !obj.link) obj.parent = parent
-    rpSeen[real] = obj
+    realpathSeen[real] = obj
     obj.depth = depth
     //if (depth >= opts.depth) return cb(null, obj)
     asyncMap(installed, function (pkg, cb) {
@@ -282,9 +282,9 @@ function resolveInheritance (obj, opts) {
 // find unmet deps by walking up the tree object.
 // No I/O
 function findUnmet (obj, opts) {
-  var fuSeen = opts.fuSeen
-  if (fuSeen.indexOf(obj) !== -1) return
-  fuSeen.push(obj)
+  var findUnmetSeen = opts.findUnmetSeen
+  if (findUnmetSeen.indexOf(obj) !== -1) return
+  findUnmetSeen.push(obj)
   debug("find unmet obj=%j parent=%s", obj.name || obj, obj.parent && obj.parent.name)
   var deps = obj.dependencies = obj.dependencies || {}
 
@@ -364,9 +364,9 @@ function unmarkExtraneous (obj, opts) {
   Object.keys(deps).forEach(function (d) {
     var dep = findDep(obj, d)
     if (dep && dep.extraneous) {
-      unmarkExtraneous(dep, opts);
+      unmarkExtraneous(dep, opts)
     }
-  });
+  })
 }
 
 // Find the one that will actually be loaded by require()
