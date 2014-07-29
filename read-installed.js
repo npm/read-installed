@@ -101,14 +101,7 @@ var url = require("url")
 var util = require("util")
 var extend = require("util-extend")
 
-var debug = function() {}
-if (/\bread-installed\b/i.test(process.env.NODE_DEBUG || "")) {
-  debug = function () {
-    var msg = util.format.apply(util, arguments)
-    msg = msg.trim().split(/\n/).join("\nREAD-INSTALLED ")
-    console.error("%s %s", "READ-INSTALLED", msg)
-  }
-}
+var debug = require("debuglog")("read-installed")
 
 module.exports = readInstalled
 
@@ -285,7 +278,7 @@ function findUnmet (obj, opts) {
   var findUnmetSeen = opts.findUnmetSeen
   if (findUnmetSeen.indexOf(obj) !== -1) return
   findUnmetSeen.push(obj)
-  debug("find unmet obj=%j parent=%s", obj.name || obj, obj.parent && obj.parent.name)
+  debug("find unmet parent=%s obj=", obj.parent && obj.parent.name, obj.name || obj)
   var deps = obj.dependencies = obj.dependencies || {}
 
   debug(deps)
