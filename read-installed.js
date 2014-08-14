@@ -222,6 +222,8 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       var rv = obj.dependencies[pkg]
       if (!rv && obj.devDependencies && opts.dev)
         rv = obj.devDependencies[pkg]
+      else if (!rv && opts.dev === false)
+        return cb(null, obj)
 
       if (depth > opts.depth) {
         obj.dependencies = {}
@@ -229,7 +231,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       }
 
       readInstalled_( path.resolve(folder, "node_modules/"+pkg)
-                    , obj, pkg, obj.dependencies[pkg], depth + 1, opts
+                    , obj, pkg, rv, depth + 1, opts
                     , cb )
 
     }, function (er, installedData) {
