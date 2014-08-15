@@ -222,7 +222,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
       var rv = obj.dependencies[pkg]
       if (!rv && obj.devDependencies && opts.dev)
         rv = obj.devDependencies[pkg]
-      else if (!rv && opts.dev === false)
+      else if (!rv)
         return cb(null, obj)
 
       if (depth > opts.depth) {
