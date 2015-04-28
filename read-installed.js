@@ -126,9 +126,10 @@ function readInstalled (folder, opts, cb) {
   opts.dev = !!opts.dev
   opts.realpathSeen = {}
   opts.findUnmetSeen = []
+  opts.modulesFolder = opts.modulesFolder || "node_modules"
 
 
-  readInstalled_(folder, null, null, null, 0, opts, function (er, obj) {
+  readInstalled_(folder, opts.modulesFolder, null, null, null, 0, opts, function (er, obj) {
     if (er) return cb(er)
     // now obj has all the installed things, where they're installed
     // figure out the inheritance links, now that the object is built.
@@ -139,14 +140,14 @@ function readInstalled (folder, opts, cb) {
   })
 }
 
-function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
+function readInstalled_ (folder, modulesFolder, parent, name, reqver, depth, opts, cb) {
   var installed
     , obj
     , real
     , link
     , realpathSeen = opts.realpathSeen
 
-  readdir(path.resolve(folder, "node_modules"), function (er, i) {
+  readdir(path.resolve(folder, modulesFolder), function (er, i) {
     // error indicates that nothing is installed here
     if (er) i = []
     installed = i.filter(function (f) { return f.charAt(0) !== "." })
@@ -229,8 +230,8 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
         return cb(null, obj)
       }
 
-      readInstalled_( path.resolve(folder, "node_modules/"+pkg)
-                    , obj, pkg, obj.dependencies[pkg], depth + 1, opts
+      readInstalled_( path.resolve(folder, modulesFolder+"/"+pkg)
+                    , modulesFolder, obj, pkg, obj.dependencies[pkg], depth + 1, opts
                     , cb )
 
     }, function (er, installedData) {
