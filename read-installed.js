@@ -202,6 +202,7 @@ function readInstalled_ (folder, parent, name, reqver, depth, opts, cb) {
     // "foo":"http://blah" and "foo":"latest" are always presumed valid
     if (reqver
         && semver.validRange(reqver, true)
+        && reqver !== "*" // See #40.
         && !semver.satisfies(obj.version, reqver, true)) {
       obj.invalid = true
     }
