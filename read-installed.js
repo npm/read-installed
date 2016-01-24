@@ -343,13 +343,7 @@ function findUnmet (obj, opts) {
       obj.dependencies[d] = peerDeps[d]
     } else if (!semver.satisfies(dependency.version, peerDeps[d], true)) {
       dependency.peerInvalid = dependency.peerInvalid || [];
-      var path = [];
-      var r = obj;
-      while (r.parent){
-        path.unshift(r.name + '@' + r.version)
-        r = r.parent;
-      }
-      dependency.peerInvalid.push(path)
+      dependency.peerInvalid.push(obj)
     }
   })
 
