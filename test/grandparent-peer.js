@@ -5,7 +5,7 @@ var path = require('path');
 function allValid(t, map) {
   var deps = Object.keys(map.dependencies || {})
   deps.forEach(function (dep) {
-    t.notOk(map.dependencies[dep].invalid, 'dependency ' + dep + ' of ' + map.name + ' is not invalid')
+    t.notOk(map.dependencies[dep].peerInvalid, 'dependency ' + dep + ' of ' + map.name + ' is not peerInvalid')
     t.notOk(typeof map.dependencies[dep] === 'string', 'dependency ' + dep + ' of ' + map.name + ' is not missing')
   })
   deps.forEach(function (dep) {
