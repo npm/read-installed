@@ -10,5 +10,4 @@ coverage.html
 .idea
 lib-cov
 
-node_modules
-!test/fixtures
+/node_modules
