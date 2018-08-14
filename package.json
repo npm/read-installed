@@ -10,6 +10,9 @@
   "scripts": {
     "test": "tap ./test/*.js"
   },
+  "files": [
+    "read-installed.js"
+  ],
   "dependencies": {
     "debuglog": "^1.0.1",
     "read-package-json": "^2.0.0",
