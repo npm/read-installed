@@ -12,7 +12,7 @@
   },
   "dependencies": {
     "debuglog": "^1.0.1",
-    "read-package-json": "^2.0.0",
+    "read-package-json": "^3.0.1",
     "readdir-scoped-modules": "^1.0.0",
     "semver": "2 || 3 || 4 || 5",
     "slide": "~1.1.3",
